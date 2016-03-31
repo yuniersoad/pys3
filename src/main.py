@@ -5,7 +5,9 @@ import ssl
 
 from utils import *
 
-ROOT_DIR = '../test_root'
+dirname = os.path.dirname(__file__)
+ROOT_DIR = os.path.join(dirname, '../test_root')
+TEMPLATE_PATH = os.path.join(dirname, 'templates')
 
 class MainHandler(tornado.web.RequestHandler):
     def prepare(self):
@@ -52,7 +54,8 @@ application = tornado.web.Application(
        (r'/', MainHandler), 
        (r'/(.*)/', BucketHandler),
        (r'/(.*)/(.*)', ObjectsHandler),
-      ])
+      ],
+      template_path=TEMPLATE_PATH)
 
 ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 ssl_ctx.load_cert_chain("server.crt", "server.key")
