@@ -5,7 +5,7 @@
     <Marker/>
     <MaxKeys>1000</MaxKeys>
     <IsTruncated>false</IsTruncated>
-    {% for object in objects%}
+    {% for object in objects %}
     <Contents>
         <Key>{{ object }}</Key>
         {% if not object.isdir %}

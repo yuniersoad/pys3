@@ -5,7 +5,7 @@
       <DisplayName>webfile</DisplayName>
   </Owner>
   <Buckets>
-	  {% for bucket in buckets%}
+	  {% for bucket in buckets %}
 	  <Bucket>
 		  <Name>{{ bucket }}</Name>
 	        <CreationDate>2006-02-03T16:45:09.000Z</CreationDate>
