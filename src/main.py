@@ -1,9 +1,13 @@
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
+from tornado.options import define, options
 import ssl
 
 from utils import *
+
+define("sslcert", default=None, help="Path to ssl certificate")
+define("sslkey", default=None, help="Path to ssl key")
 
 dirname = os.path.dirname(__file__)
 ROOT_DIR = os.path.join(dirname, '../test_root')
@@ -49,7 +53,16 @@ class ObjectsHandler(tornado.web.RequestHandler):
         delete_object(ROOT_DIR, bucket, path)
         self.set_status(204)
 
-application = tornado.web.Application(
+if __name__ == '__main__':
+     options.parse_command_line()
+
+     with_ssl = not(options.sslcert is None) and not(options.sslkey is None)
+     ssl_ctx = None
+     if with_ssl:
+	     ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+	     ssl_ctx.load_cert_chain(options.sslcert, options.sslkey)
+
+     application = tornado.web.Application(
       [
        (r'/', MainHandler), 
        (r'/(.*)/', BucketHandler),
@@ -57,11 +70,7 @@ application = tornado.web.Application(
       ],
       template_path=TEMPLATE_PATH)
 
-ssl_ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-ssl_ctx.load_cert_chain("server.crt", "server.key")
-
-if __name__ == '__main__':
-        http_server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_ctx)
-        http_server.listen(443)
-        tornado.ioloop.IOLoop.instance().start()
+     http_server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_ctx)
+     http_server.listen(443 if with_ssl else 8080)
+     tornado.ioloop.IOLoop.instance().start()
 
