@@ -6,12 +6,13 @@ import ssl
 
 from utils import *
 
-define("sslcert", default=None, help="Path to ssl certificate")
-define("sslkey", default=None, help="Path to ssl key")
-
 dirname = os.path.dirname(__file__)
 ROOT_DIR = os.path.join(dirname, '../test_root')
 TEMPLATE_PATH = os.path.join(dirname, 'templates')
+
+define("sslcert", default=None, help="Path to ssl certificate")
+define("sslkey", default=None, help="Path to ssl key")
+define("root", default=ROOT_DIR, help="Path to root folder") 
 
 class MainHandler(tornado.web.RequestHandler):
     def prepare(self):
@@ -19,7 +20,7 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self):
         self.set_header('Content-Type', 'application/XML')
-        self.render("bucket_list.xml", buckets=get_buckets(ROOT_DIR))
+        self.render("bucket_list.xml", buckets=get_buckets(options.root))
 
 class BucketHandler(tornado.web.RequestHandler):
     def prepare(self):
@@ -30,10 +31,10 @@ class BucketHandler(tornado.web.RequestHandler):
         prefix = self.request.query_arguments["prefix"][0].decode("utf-8")
         print (prefix)
         self.set_header('Content-Type', 'application/XML')
-        self.render("object_list.xml", bucket = bucket,objects=get_objects(ROOT_DIR, bucket, prefix))
+        self.render("object_list.xml", bucket = bucket,objects=get_objects(options.root, bucket, prefix))
 
     def delete(self, bucket):
-        delete_bucket(ROOT_DIR, bucket)
+        delete_bucket(options.root, bucket)
         self.set_status(204)
 
 class ObjectsHandler(tornado.web.RequestHandler):
@@ -41,7 +42,7 @@ class ObjectsHandler(tornado.web.RequestHandler):
         print (self.request)
 
     def get(self, bucket, path):
-        full_path = os.path.join(ROOT_DIR, bucket, path)
+        full_path = os.path.join(options.root, bucket, path)
         with open(full_path, 'rb') as f:
             while 1:
                 data = f.read(16384)
@@ -50,7 +51,7 @@ class ObjectsHandler(tornado.web.RequestHandler):
         self.finish()
 
     def delete(self, bucket, path):
-        delete_object(ROOT_DIR, bucket, path)
+        delete_object(options.root, bucket, path)
         self.set_status(204)
 
 if __name__ == '__main__':
